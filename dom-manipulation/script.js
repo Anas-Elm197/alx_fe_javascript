@@ -67,6 +67,7 @@ function addQuote(text, category) {
   showRandomQuote();
 }
 
+
 // Initial setup
 showRandomQuote();
 createAddQuoteForm();
