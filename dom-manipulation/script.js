@@ -197,6 +197,22 @@ async function syncWithServer() {
   }
 }
 
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
+    if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.json();
+    return data.map(post => ({
+      id: post.id,
+      text: post.title,
+      category: post.body || 'General',
+    }));
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return [];
+  }
+}
+
 // Initialization
 populateCategories();
 showRandomQuote();
