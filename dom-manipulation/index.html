@@ -3,18 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dynamic Quote Generator</title>
+  <title>Dynamic Quote Generator with Filter</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
-    #quoteDisplay { margin: 20px 0; font-size: 1.2rem; font-style: italic; }
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    #quoteDisplay { margin: 20px 0; font-size: 1.2rem; font-style: italic; min-height: 50px; }
+    select, input, button { margin-top: 10px; padding: 8px; width: 100%; box-sizing: border-box; }
     #addQuoteForm { margin-top: 30px; }
-    input { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
-    button { padding: 10px 15px; margin-top: 10px; }
   </style>
 </head>
 <body>
 
   <h1>Dynamic Quote Generator</h1>
+
+  <!-- Category filter dropdown -->
+  <label for="categoryFilter">Filter by category:</label>
+  <select id="categoryFilter" onchange="filterQuotes()">
+    <option value="all">All Categories</option>
+    <!-- categories dynamically populated here -->
+  </select>
 
   <div id="quoteDisplay">Click "Show New Quote" to start!</div>
   <button id="newQuote">Show New Quote</button>
