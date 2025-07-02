@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dynamic Quote Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    #quoteDisplay { margin: 20px 0; font-size: 1.2rem; font-style: italic; }
+    #addQuoteForm { margin-top: 30px; }
+    input { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
+    button { padding: 10px 15px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Dynamic Quote Generator</h1>
+
+  <div id="quoteDisplay">Click "Show New Quote" to start!</div>
+  <button id="newQuote">Show New Quote</button>
+
+  <!-- Container where the add-quote form will be created dynamically -->
+  <div id="addQuoteFormContainer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
