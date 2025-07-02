@@ -5,47 +5,44 @@ const addQuoteFormContainer = document.getElementById('addQuoteFormContainer');
 const categoryFilter = document.getElementById('categoryFilter');
 const syncNotification = document.getElementById('syncNotification');
 
-// Server API simulation URLs and interval
+// Server API URLs and sync interval
 const SERVER_API_URL = 'https://jsonplaceholder.typicode.com/posts?_limit=5';
 const SERVER_POST_URL = 'https://jsonplaceholder.typicode.com/posts';
 const SYNC_INTERVAL_MS = 30000; // 30 seconds
 
-// Load saved quotes or default
+// Load saved quotes or use default ones
 let localQuotes = JSON.parse(localStorage.getItem('quotes')) || [
   { id: 1, text: "The best way to get started is to quit talking and begin doing.", category: "Motivation" },
   { id: 2, text: "Don't let yesterday take up too much of today.", category: "Inspiration" },
   { id: 3, text: "You learn more from failure than from success.", category: "Life" },
 ];
 
-// Ensure all quotes have IDs (assign negative IDs if missing)
-localQuotes = localQuotes.map((q, i) => q.id ? q : {...q, id: -(i + 1)});
+// Assign negative IDs to local quotes without IDs (local only)
+localQuotes = localQuotes.map((q, i) => q.id ? q : { ...q, id: -(i + 1) });
 
-// Load last selected category
+// Restore last selected category filter
 if (localStorage.getItem('selectedCategory')) {
   categoryFilter.value = localStorage.getItem('selectedCategory');
 } else {
   categoryFilter.value = 'all';
 }
 
-// Save quotes helper
+// Save local quotes to localStorage
 function saveLocalQuotes() {
   localStorage.setItem('quotes', JSON.stringify(localQuotes));
 }
 
-// Generate unique negative ID for local-only quotes
+// Generate unique negative ID for new local quotes
 function generateLocalId() {
   return localQuotes.reduce((minId, q) => (q.id < minId ? q.id : minId), 0) - 1;
 }
 
-// Populate categories dropdown dynamically
+// Populate category dropdown dynamically
 function populateCategories() {
   const categories = [...new Set(localQuotes.map(q => q.category))];
-
-  // Remove old categories except "All Categories"
   while (categoryFilter.options.length > 1) {
     categoryFilter.remove(1);
   }
-
   categories.forEach(cat => {
     const option = document.createElement('option');
     option.value = cat;
@@ -57,7 +54,6 @@ function populateCategories() {
 // Show random quote filtered by category
 function showRandomQuote() {
   const selectedCategory = categoryFilter.value;
-
   const filteredQuotes = selectedCategory === 'all' 
     ? localQuotes 
     : localQuotes.filter(q => q.category === selectedCategory);
@@ -72,13 +68,13 @@ function showRandomQuote() {
   quoteDisplay.innerHTML = `<q>${quote.text}</q> — <strong>[${quote.category}]</strong>`;
 }
 
-// Filter quotes on category change
+// Update quote display when category filter changes
 function filterQuotes() {
   localStorage.setItem('selectedCategory', categoryFilter.value);
   showRandomQuote();
 }
 
-// Create add quote form dynamically
+// Create and inject the add-quote form dynamically
 function createAddQuoteForm() {
   const form = document.createElement('div');
   form.id = 'addQuoteForm';
@@ -133,11 +129,10 @@ async function addQuote(text, category) {
   alert('Quote added!');
   showRandomQuote();
 
-  // Post the new quote to server (mock)
   await postQuoteToServer({ title: newQuote.text, body: newQuote.category });
 }
 
-// Convert server post to quote format
+// Convert server response post to quote format
 function serverPostToQuote(post) {
   return {
     id: post.id,
@@ -146,7 +141,7 @@ function serverPostToQuote(post) {
   };
 }
 
-// Show sync notifications
+// Show sync notifications in UI
 function showSyncNotification(message, isError = false) {
   syncNotification.textContent = message;
   syncNotification.style.color = isError ? 'red' : 'green';
@@ -173,9 +168,7 @@ async function postQuoteToServer(quote) {
   try {
     const response = await fetch(SERVER_POST_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(quote),
     });
 
@@ -189,25 +182,25 @@ async function postQuoteToServer(quote) {
   }
 }
 
-// Sync with server and merge data
-async function syncWithServer() {
+// The main sync function called periodically
+async function syncQuotes() {
   try {
     const serverQuotes = await fetchQuotesFromServer();
-
     let updated = false;
 
     serverQuotes.forEach(serverQ => {
       const localIndex = localQuotes.findIndex(q => q.id === serverQ.id);
       if (localIndex === -1) {
-        // New quote from server
+        // New quote from server, add it locally
         localQuotes.push(serverQ);
         updated = true;
       } else {
-        // Conflict resolution: server wins
+        // Conflict resolution: server data takes precedence
         const localQ = localQuotes[localIndex];
         if (localQ.text !== serverQ.text || localQ.category !== serverQ.category) {
           localQuotes[localIndex] = serverQ;
           updated = true;
+          showSyncNotification(`Conflict resolved for quote ID ${serverQ.id}`, true);
         }
       }
     });
@@ -216,13 +209,14 @@ async function syncWithServer() {
       saveLocalQuotes();
       populateCategories();
 
+      // Reset category filter if current category no longer exists
       if (![...new Set(localQuotes.map(q => q.category))].includes(categoryFilter.value)) {
         categoryFilter.value = 'all';
         localStorage.setItem('selectedCategory', 'all');
       }
 
       filterQuotes();
-      showSyncNotification('Data synced with server and updated.');
+      showSyncNotification('Data synced and updated from server.');
     } else {
       showSyncNotification('Data synced with server. No changes.');
     }
@@ -239,8 +233,8 @@ createAddQuoteForm();
 newQuoteBtn.addEventListener('click', showRandomQuote);
 categoryFilter.addEventListener('change', filterQuotes);
 
-// Start periodic sync
-setInterval(syncWithServer, SYNC_INTERVAL_MS);
+// Start periodic sync every 30 seconds
+setInterval(syncQuotes, SYNC_INTERVAL_MS);
 
-// Sync once on page load
-syncWithServer();
+// Initial sync on page load
+syncQuotes();
