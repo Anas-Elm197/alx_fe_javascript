@@ -5,8 +5,9 @@ const addQuoteFormContainer = document.getElementById('addQuoteFormContainer');
 const categoryFilter = document.getElementById('categoryFilter');
 const syncNotification = document.getElementById('syncNotification');
 
-// Server API simulation
+// Server API simulation URLs and interval
 const SERVER_API_URL = 'https://jsonplaceholder.typicode.com/posts?_limit=5';
+const SERVER_POST_URL = 'https://jsonplaceholder.typicode.com/posts';
 const SYNC_INTERVAL_MS = 30000; // 30 seconds
 
 // Load saved quotes or default
@@ -95,8 +96,8 @@ function createAddQuoteForm() {
   const addButton = document.createElement('button');
   addButton.textContent = 'Add Quote';
 
-  addButton.addEventListener('click', () => {
-    addQuote(quoteInput.value, categoryInput.value);
+  addButton.addEventListener('click', async () => {
+    await addQuote(quoteInput.value, categoryInput.value);
     quoteInput.value = '';
     categoryInput.value = '';
   });
@@ -108,8 +109,8 @@ function createAddQuoteForm() {
   addQuoteFormContainer.appendChild(form);
 }
 
-// Add new quote
-function addQuote(text, category) {
+// Add new quote locally and post to server
+async function addQuote(text, category) {
   if (!text.trim() || !category.trim()) {
     alert('Please enter both quote text and category.');
     return;
@@ -131,6 +132,9 @@ function addQuote(text, category) {
 
   alert('Quote added!');
   showRandomQuote();
+
+  // Post the new quote to server (mock)
+  await postQuoteToServer({ title: newQuote.text, body: newQuote.category });
 }
 
 // Convert server post to quote format
@@ -151,14 +155,44 @@ function showSyncNotification(message, isError = false) {
   }, 5000);
 }
 
-// Sync with server and merge data
-async function syncWithServer() {
+// Fetch quotes from server
+async function fetchQuotesFromServer() {
   try {
     const response = await fetch(SERVER_API_URL);
     if (!response.ok) throw new Error('Network response was not ok');
+    const data = await response.json();
+    return data.map(serverPostToQuote);
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return [];
+  }
+}
 
-    const serverPosts = await response.json();
-    const serverQuotes = serverPosts.map(serverPostToQuote);
+// Post new quote to server
+async function postQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_POST_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(quote),
+    });
+
+    if (!response.ok) throw new Error('Failed to post quote');
+
+    const data = await response.json();
+    console.log('Quote posted:', data);
+    return data;
+  } catch (error) {
+    console.error('Error posting quote:', error);
+  }
+}
+
+// Sync with server and merge data
+async function syncWithServer() {
+  try {
+    const serverQuotes = await fetchQuotesFromServer();
 
     let updated = false;
 
@@ -194,22 +228,6 @@ async function syncWithServer() {
     }
   } catch (error) {
     showSyncNotification('Sync failed: ' + error.message, true);
-  }
-}
-
-async function fetchQuotesFromServer() {
-  try {
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts?_limit=5');
-    if (!response.ok) throw new Error('Network response was not ok');
-    const data = await response.json();
-    return data.map(post => ({
-      id: post.id,
-      text: post.title,
-      category: post.body || 'General',
-    }));
-  } catch (error) {
-    console.error('Fetch error:', error);
-    return [];
   }
 }
 
