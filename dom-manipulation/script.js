@@ -66,6 +66,16 @@ function addQuote(text, category) {
   alert('Quote added!');
   showRandomQuote();
 }
+function showRandomQuote() {
+  if (quotes.length === 0) {
+    quoteDisplay.innerHTML = "<em>No quotes available. Add some below!</em>";
+    return;
+  }
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const quote = quotes[randomIndex];
+  quoteDisplay.innerHTML = `<q>${quote.text}</q> — <strong>[${quote.category}]</strong>`;
+}
+
 
 
 // Initial setup
