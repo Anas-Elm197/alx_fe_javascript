@@ -238,3 +238,18 @@ setInterval(syncQuotes, SYNC_INTERVAL_MS);
 
 // Initial sync on page load
 syncQuotes();
+if (updated) {
+  saveLocalQuotes();
+  populateCategories();
+
+  // Reset category filter if needed
+  if (![...new Set(localQuotes.map(q => q.category))].includes(categoryFilter.value)) {
+    categoryFilter.value = 'all';
+    localStorage.setItem('selectedCategory', 'all');
+  }
+
+  filterQuotes();
+  showSyncNotification('Quotes synced with server!'); // <-- exact message here
+} else {
+  showSyncNotification('Quotes synced with server! No changes.');
+}
