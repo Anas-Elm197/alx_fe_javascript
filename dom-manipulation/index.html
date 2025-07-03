@@ -2,34 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dynamic Quote Generator with Filter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic Quote Generator</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    #quoteDisplay { margin: 20px 0; font-size: 1.2rem; font-style: italic; min-height: 50px; }
-    select, input, button { margin-top: 10px; padding: 8px; width: 100%; box-sizing: border-box; }
-    #addQuoteForm { margin-top: 30px; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    #quoteDisplay {
+      background: #fff;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select, button {
+      margin: 5px;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      cursor: pointer;
+      background: #007BFF;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
   </style>
 </head>
 <body>
-
   <h1>Dynamic Quote Generator</h1>
 
-  <!-- Category filter dropdown -->
-  <label for="categoryFilter">Filter by category:</label>
-  <select id="categoryFilter" onchange="filterQuotes()">
-    <option value="all">All Categories</option>
-    <!-- categories dynamically populated here -->
-  </select>
-
-  <div id="quoteDisplay">Click "Show New Quote" to start!</div>
+  <div id="quoteDisplay"></div>
   <button id="newQuote">Show New Quote</button>
-<!-- Add this below your quoteDisplay div -->
-<div id="syncNotification" style="color: green; font-weight: bold; margin: 10px 0;"></div>
 
-  <!-- Container where the add-quote form will be created dynamically -->
-  <div id="addQuoteFormContainer"></div>
-  
+  <h2>Filter by Category</h2>
+  <select id="categoryFilter"></select>
+
+  <h2>Add a New Quote</h2>
+  <input id="newQuoteText" type="text" placeholder="Enter quote" />
+  <input id="newQuoteCategory" type="text" placeholder="Enter category" />
+  <button id="addBtn">Add Quote</button>
+
+  <h2>Import / Export</h2>
+  <input type="file" id="importFile" accept=".json" />
+  <button id="exportBtn">Export Quotes</button>
   <script src="script.js"></script>
 </body>
 </html>
